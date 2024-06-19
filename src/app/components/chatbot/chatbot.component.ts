@@ -1,15 +1,19 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { NgClass, NgOptimizedImage, NgTemplateOutlet } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ImagePreloadService } from '@services/image-preload.service';
-import { OpenAiApiService } from '@services/open-ai-api.service';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChatService } from '@services/chat.service';
 import { ToastrService } from 'ngx-toastr';
+import { AuthService } from '@services/auth.service';
+import { Router } from '@angular/router';
+import { ChatMessage } from '@models/chat-message.model';
+import { User } from '@angular/fire/auth';
 
 const MODULES = [
   NgClass,
   NgTemplateOutlet,
-  ReactiveFormsModule
+  ReactiveFormsModule,
+  NgOptimizedImage
 ]
 
 @Component({
@@ -30,19 +34,30 @@ const MODULES = [
 export class ChatbotComponent implements OnInit {
   userMessage = new FormControl('', Validators.required);
   assistantReply!: string;
-  chatMessages: { role: string, content: string }[] = [];
+  chatMessages: ChatMessage[] = [];
+  // currentUser: User | null = null;
   isTyping: boolean = false;
   showError: boolean = false;
+  currentYear: number = new Date().getFullYear();
 
-  private openAiApiService = inject(OpenAiApiService);
+  private chatService = inject(ChatService);
   private toastr = inject(ToastrService);
-  private imagePreloadService = inject(ImagePreloadService);
+  private authService = inject(AuthService);
+  private route = inject(Router);
 
   ngOnInit() {
-    this.imagePreloadService.preloadImages([
-      'assets/images/user.jpg',
-      'assets/images/bot.jpg'
-    ]);
+    // const savedTheme = localStorage.getItem('theme');
+    // if (savedTheme) {
+    //   document.documentElement.setAttribute('data-theme', savedTheme);
+    // }
+    // this.changeTheme();
+    
+
+    // this.authService.getCurrentUser().subscribe(user => {
+    //   this.currentUser = user;
+    //   console.log('Current user:', this.currentUser);
+    // });
+
 
     const storedMessages = localStorage.getItem('chatMessages');
     if (!storedMessages) {
@@ -73,7 +88,7 @@ export class ChatbotComponent implements OnInit {
     console.log(`User: ${userMessage}`);
     this.isTyping = true;
 
-    this.openAiApiService.sendMessage(userMessage)
+    this.chatService.sendMessage(userMessage)
       .subscribe({
         next: response => {
           setTimeout(() => {
@@ -101,4 +116,31 @@ export class ChatbotComponent implements OnInit {
     this.chatMessages = [];
     localStorage.removeItem('chatMessages');
   }
+
+  onClick() {
+    this.authService.logout()
+    .then(() => {
+      this.route.navigate(["/login"]);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
+
+  changeTheme(): void {
+    // Alternar entre los temas disponibles
+    const themes = ['light', 'dark', 'cupcake'];
+    const currentThemeAttr = document.documentElement.getAttribute('data-theme');
+    const currentIndex = currentThemeAttr!== null? themes.indexOf(currentThemeAttr) : -1;
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const nextTheme = themes[nextIndex];
+
+    // Cambia el atributo data-theme del elemento <html>
+    document.documentElement.setAttribute('data-theme', nextTheme);
+
+    // Guarda la elección del tema en el almacenamiento local
+    localStorage.setItem('theme', nextTheme);
+  }
+
+
 }

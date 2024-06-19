@@ -25,13 +25,16 @@
     ],
     "paths": {
       "@components/*": [
-        "src/components/*"
+        "src/app/components/*"
       ],
       "@services/*": [
-        "src/services/*"
+        "src/app/services/*"
       ],
       "@environments": [
         "src/environments/environment"
+      ],
+      "@models/*": [
+        "src/app/models/*"
       ]
     }
   },

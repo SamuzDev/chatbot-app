@@ -1,0 +1,49 @@
+<div class="flex items-center justify-center min-h-screen bg-opacity-70 bg-base-300">
+    <div class="bg-opacity-80 card w-96">
+        <div class="rounded-lg shadow-lg card-body bg-base-200 bg-opacity-90">
+            <h2 class="mb-6 text-4xl font-semibold text-center text-night-primary">Login</h2>
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+                <div class="form-control">
+                    <label for="username" class="label">Username:</label>
+                    <input id="username" name="username" type="text" formControlName="username"
+                        class="input input-bordered" autocomplete="email">
+                    @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+                    <div class="text-red-500">
+                        @if (loginForm.get('username')?.errors?.['required']) {
+                        <div>Username is required</div>
+                        }
+                        @if (loginForm.get('username')?.errors?.['pattern']) {
+                        <div>Username must be alphanumeric</div>
+                        }
+                    </div>
+                    }
+                </div>
+                <div class="form-control">
+                    <label for="password" class="label">Password:</label>
+                    <input id="password" name="password" type="password" formControlName="password"
+                        class="input input-bordered" autocomplete="off">
+                    @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+                    <div class="text-red-500">
+                        @if (loginForm.get('password')?.errors?.['required']) {
+                        <div>Password is required</div>
+                        }
+                        @if (loginForm.get('password')?.errors?.['minlength']) {
+                        <div>Password must be at least 3 characters long</div>
+                        }
+                    </div>
+                    }
+                </div>
+                <div class="form-control">
+                    <button type="submit"
+                        class="w-full btn btn-primary">Login</button>
+                </div>
+                <div class="mt-6 text-center">
+                    <span>Not have an account?</span>
+                    <a href="/register" class="ml-2 text-primary">Register</a>
+                </div>
+            </form>
+
+            <app-button-providers />
+        </div>
+    </div>
+</div>
